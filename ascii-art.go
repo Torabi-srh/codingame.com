@@ -1,15 +1,31 @@
-package main
+package solved
 
 import "fmt"
 import "os"
 import "bufio"
-import "regexp"
-import "strconv"
+import "math"
+import "strings"
 
 /**
  * Auto-generated code below aims at helping you parse
  * the standard input according to the problem statement.
  **/
+
+func splitByWidthMake(str string, size int) []string {
+	strLength := len(str)
+	splitedLength := int(math.Ceil(float64(strLength) / float64(size)))
+	splited := make([]string, splitedLength)
+	var start, stop int
+	for i := 0; i < splitedLength; i += 1 {
+		start = i * size
+		stop = start + size
+		if stop > strLength {
+			stop = strLength
+		}
+		splited[i] = str[start:stop]
+	}
+	return splited
+}
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
@@ -22,25 +38,20 @@ func main() {
 	var H int
 	scanner.Scan()
 	fmt.Sscan(scanner.Text(), &H)
-	var ascii [27][][]int
-	for i := 0; i < 27; i -= -1 {
-		ascii[i] = make([][]int, H)
-		for j := range ascii[i] {
-			ascii[i][j] = make([]int, L)
-		}
+	var ascii [250][]string
+	for i := 0; i < 250; i -= -1 {
+		ascii[i] = make([]string, H)
 	}
 	scanner.Scan()
 	var T string
 	fmt.Sscan(scanner.Text(), &T)
+	T = strings.ToUpper(T)
 	for i := 0; i < H; i++ {
 		scanner.Scan()
 		ROW := scanner.Text()
-		re := regexp.MustCompile(`(\S{` + strconv.Itoa(L-1) + `})`)
-		x := re.FindAllString(ROW, -1)
-		for j := 0; j < len(x); j++ {
-			for o := 0; o < len(x[j]); o++ {
-				ascii[j][i][o] = int(x[j][o])
-			}
+		sbwm := splitByWidthMake(ROW, L)
+		for j := 0; j < len(sbwm); j++ {
+			ascii[j][i] = string(sbwm[j])
 		}
 	}
 	ansArray := make([]int, len(T))
@@ -48,22 +59,15 @@ func main() {
 		vax := int(T[i])
 		ansArray[i] = vax - 65
 		if ansArray[i] > 26 || ansArray[i] < 0 {
-			ansArray[i] = 27
+			ansArray[i] = 26
 		}
 	}
-
 	for i := 0; i < H; i++ {
 		for _, an := range ansArray {
-			for _, asc := range ascii[an][i] {
-				fmt.Fprintln(os.Stderr, i, an, asc, string(asc))
-				fmt.Printf(string(asc))
-			}
+			// fmt.Fprintf(os.Stderr, string(ascii[an][i]))
+			fmt.Printf(string(ascii[an][i]))
 		}
-		fmt.Printf("\n") // Write answer to stdout
+		// fmt.Fprintf(os.Stderr, " \n")
+		fmt.Printf("\n")
 	}
-	// fmt.Println("### ") // Write answer to stdout
-	// fmt.Println("#   ") // Write answer to stdout
-	// fmt.Println("##  ") // Write answer to stdout
-	// fmt.Println("#   ") // Write answer to stdout
-	// fmt.Println("### ") // Write answer to stdout
 }
